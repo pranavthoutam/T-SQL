@@ -17,7 +17,6 @@ set @chind=@chind+1;
 end
 return @res;
 end;
-go
 
 print dbo.alpha2numeric('123ptnshf3') ;
 
