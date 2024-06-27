@@ -1,0 +1,51 @@
+1. Write a script to extract all the numerics from Alphanumeric String.
+
+create function alpha2numeric(@str varchar(30))
+returns varchar(30) as 
+begin 
+declare @res varchar(30)='';
+declare @chind int =1;
+declare @char char;
+while @chind<=len(@str)
+begin 
+set @char=SUBSTRING(@str,@chind,1);
+if ascii(@char) between 47 and 58
+begin 
+set @res=@res+@char;
+end
+set @chind=@chind+1;
+end
+return @res;
+end;
+go
+
+print dbo.alpha2numeric('123ptnshf3') ;
+
+
+2. Write a script to calculate age based on the Input DOB
+
+create function age(@dob date) returns int as
+begin 
+declare @pdate date = getdate();
+declare @day int = day(@dob),@mon int=month(@dob),@year int =year(@dob);
+declare @pday int = day(@pdate),@pmon int = month(@pdate),@pyear int = year(@pdate);
+if @mon>@pmon
+return @pyear-@year;
+else if @mon<@pmon
+return @pyear-@year+1;
+else if @day>@pday
+return @pyear-@year;
+
+return @pyear-@year+1;
+end
+go
+select dbo.age('2002-11-06') as AGE;
+
+3. Create a column in a table and that should throw an error when we do SELECT * or SELECT of that column. If we select other columns then we should see results
+create table computed_column
+(empid int not null,
+empname varchar(50) not null,
+dob date not null,
+age as (datediff(yy,dob,getdate())+1/0),
+constraint [PK_Employee] primary key clustered(empid asc));
+select * from computed_column;
