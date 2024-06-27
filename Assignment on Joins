@@ -1,0 +1,187 @@
+---employees table: employee_id, employee_name, department_id, hire_date
+---departments table: department_id, department_name
+---salaries table: employee_id, salary_amount, salary_date
+---Write a SQL query to retrieve the names of employees along with their department names and the latest salary amount.
+--->1
+create table #1emp (
+emp_id int primary key,
+emp_name varchar(30) not null,
+dp_id int foreign key references #1dep(dep_id),
+hire_date date not null);
+
+create table #1dep
+(dep_id int primary key,
+dp_name varchar(30) not null);
+
+create table #1sal(
+emp_id int foreign key references #1emp(emp_id),
+sal_amount int not null,
+sal_date date not null);
+
+insert into #1sal values (1,20000,'2022-02-01'),(2,30000,'2022-03-08'),(1,15000,'2022-01-01');
+
+insert into #1emp values (1,'ravi',2,'2021-12-29'),(2,'kamal',1,'2022-02-26');
+
+insert into #1dep values (1,'delivery'),(2,'pmo');
+
+select * from #1sal;
+select * from #1dep;
+select * from #1emp;
+
+select e.emp_name , d.dp_name,max(s.sal_amount) from #1emp e
+join #1dep d on e.dp_id=d.dep_id
+join #1sal s on e.emp_id=s.emp_id group by e.emp_name,d.dp_name ;
+
+--->You have tables products, categories, and orders.
+---products table: product_id, product_name, category_id, price
+---categories table: category_id, category_name
+---orders table: order_id, product_id, quantity, order_date
+---Write a SQL query to find out the total revenue generated from each category in the last month.
+--->2
+create table categories (
+  c_id int primary key,
+  c_name varchar(50) not null
+);
+
+create table products
+(p_id int primary key,
+p_name varchar(50) not null,
+c_id int foreign key references categories(c_id),
+price int not null,
+);
+
+create table orders1 (
+o_id int primary key,
+p_id int not null foreign key references products(p_id),
+qty int not null,
+o_date date not null
+);
+
+
+insert into categories  values (1, 'electronics'), (2, 'clothing'), (3, 'home & kitchen');
+
+insert into products  values (1, 'laptop', 1, 899), (2, 'smartwatch', 1, 249), (3, 'shirt', 2, 29),
+(4, 'jeans', 2, 49), (5, 'coffee maker', 3, 79.99), (6, 'microwave', 3, 149);
+
+insert into orders1 values (1, 1, 2, '2024-06-20'), (2, 3, 1, '2024-06-22'), (3, 4, 2, '2024-06-25'), (4, 5, 1, '2024-06-24');
+
+select * from categories;
+select * from products;
+select * from orders1;
+
+select c.c_name,sum(o.qty*p.price) as revenue from categories c 
+join products p on p.c_id = c.c_id
+join orders1 o on o.p_id=p.p_id
+group by c.c_id,c.c_name;
+
+---books table: book_id, book_title, author_id, publication_date
+---authors table: author_id, author_name, author_country
+---borrowers table: borrower_id, book_id, borrower_name, borrow_date, return_date
+---Write a SQL query to list all books along with their authors and the borrowers who borrowed them, including the borrow and return dates.
+
+
+
+create table authors1 (
+a_id int primary key,
+a_name varchar(50) not null,
+a_cntry varchar(20) not null);
+
+create table books1 (
+b_id int primary key,
+b_title varchar(50) not null,
+a_id int foreign key references authors1(a_id),
+pb_date date not null);
+
+create table borrowers1(
+br_id int primary key ,
+b_id int foreign key references books1(b_id),
+br_name varchar(30) not null,
+br_date date not null,
+r_date date not null);
+
+INSERT INTO authors1 (a_id, a_name, a_cntry)
+VALUES (1, 'John Doe', 'USA'),
+       (2, 'Jane Smith', 'UK'),
+       (3, 'Michael Lee', 'Canada');
+
+INSERT INTO books1 (b_id, b_title, a_id, pb_date)
+VALUES (1, 'The Lord of the Rings', 1, '1954-12-15'),
+       (2, 'Pride and Prejudice', 2, '1813-01-28'),
+       (3, 'To Kill a Mockingbird', 3, '1960-07-11');
+
+INSERT INTO borrowers1 (br_id, b_id, br_name, br_date, r_date)
+VALUES (1, 1, 'Alice Johnson', '2024-06-20', '2024-06-27'),
+       (2, 2, 'Bob Smith', '2024-06-22', '2024-06-29'),
+       (3, 3, 'Charlie Brown', '2024-06-25', '2024-07-02');
+
+select br.br_id,br.br_name,b.b_title,a.a_name,br.br_date,br.r_date from books1 b
+join authors1 a on b.a_id = a.a_id
+join borrowers1 br on br.b_id = b.b_id;
+
+
+--->5
+--E-commerce Analysis:
+--You have tables customers, orders, and products.
+ 
+--customers table: customer_id, customer_name, customer_country
+--orders table: order_id, customer_id, product_id, order_date, order_quantity
+--products table: product_id, product_name, product_price
+--Write a SQL query to find out the total revenue generated from customers in each country.
+
+create table customers#5
+( cid int primary key,
+cname varchar(50) not null,
+ccountry varchar(50) not null);
+
+create table products#5(
+pid int primary key,pname varchar(50) not null,price decimal(10,2) not null);
+
+create table orders#5 (
+oid int primary key ,cid int foreign key references customers#5(cid),pid int foreign key references products#5(pid),odate date not null,
+qty int not null);
+
+insert into customers#5 values (1,'pranav','India'),(2,'sateesh','USA'),(3,'sai','USA'),(4,'kalyan','India');
+insert into products#5 values (101,'Samsung A-50',20000),(102,'Solimo Knife',700),(201,'RC car',3000);
+insert into orders#5 values (1011,1,101,'2020-11-17',1),(1012,2,102,'2021-10-11',2),(1013,3,201,'2022-12-10',3),(1014,4,101,'2024-02-03',2);
+
+select c.ccountry,sum(o.qty*p.price) as revenue from orders#5 o
+join products#5 p on o.pid=p.pid
+join customers#5 c on o.cid=c.cid
+group by c.ccountry;
+
+--->4
+---University Enrollment:
+---There are tables students, courses, enrollments, and grades.
+---students table: student_id, student_name, student_major
+---courses table: course_id, course_name, course_department
+---enrollments table: enrollment_id, student_id, course_id, enrollment_date
+---grades table: grade_id, enrollment_id, grade_value
+---Write a SQL query to calculate the average grade for each course
+
+create table students4(
+s_id int primary key,
+sname varchar(50) not null,
+major varchar(50) not null);
+
+create table courses4(
+cid int primary key ,cname varchar(50) not null,dep varchar(10) not null);
+
+create table enrollments4(
+enid int primary key , s_id int foreign key references students4(s_id),cid int foreign key references courses4(cid),edate date not null);
+
+create table grades4(gid int primary key,enid int foreign key references enrollments4(enid),grade decimal(4,2) not null);
+
+insert into students4 values (1,'abc','Inter'),(2,'def','Inter'),(3,'ghi','Btech'),(4,'jkl','Btech'),(5,'mno','Btech');
+insert into courses4 values (101,'DBMS','CSE'),(102,'Maths','MPC'),(103,'Power systems','EEE');
+insert into enrollments4 values (1011,1,102,'2023-10-11'),(1012,2,102,'2020-10-11'),(1013,3,101,'2020-10-11'),(1014,4,103,'2020-10-11'),
+(1015,5,101,'2020-10-11');
+insert into grades4 values (1,1011,9.2),(2,1012,8.5),(3,1013,9.26),(4,1014,8.58),(5,1015,8.54);
+
+select c.cname,avg(g.grade) from enrollments4 e
+join grades4 g on e.enid=g.enid
+join students4 s on e.s_id=s.s_id
+join courses4 c on c.cid=e.cid
+group by c.cname;
+
+
+
