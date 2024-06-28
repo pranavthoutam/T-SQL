@@ -86,3 +86,17 @@ end;
 
 select * from calender;
 
+5)Display Emp and Manager Hierarchies based on the input till the topmost hierarchy. (Input would be empid)
+
+Output: Empid, empname, managername, heirarchylevel
+create table heirarchy5(
+id int ,
+name varchar(30),
+salary numeric,
+mid numeric);
+
+insert into heirarchy5 values (1,'abc',3000,3),(2,'def',2500,1),(3,'ghi',4000,4),(4,'jkl',5000,null),(5,'mno',2000,2);
+
+select e1.name as Employee ,e2.name as Manager from heirarchy5 e1
+join heirarchy5 e2
+on e1.mid=e2.id
