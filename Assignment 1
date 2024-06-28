@@ -48,3 +48,41 @@ dob date not null,
 age as (datediff(yy,dob,getdate())+1/0),
 constraint [PK_Employee] primary key clustered(empid asc));
 select * from computed_column;
+
+4. Display Calendar Table based on the input year. If I give the year 2017 then populate data for 2017 only
+
+Date e.g.  1/1/2017 
+
+DayofYear 1 – 365/366 (Note 1)
+
+Week 1-52/53
+
+DayofWeek 1-7
+
+Month 1-12
+
+DayofMonth 1-30/31 (Note 2)
+
+Note 1: DayofYear varies depending on the number of days in the given year.
+
+Note 2: DayofMonth varies depending on number of days in the given month
+create table calender (
+date_ date,
+day_ as (datepart(dayofyear,date_)),
+week_ as (datepart(week,date_)),
+dayofweek_ as (datepart(weekday,date_)),
+month_ as (datepart(month,date_)),
+dayofmonth_ as (datepart(day,date_)),
+);
+
+declare @date int =2023;
+declare @1day date = concat(@date,'-01-01');
+
+while year(@1day)=@date
+begin
+insert into calender values (@1day);
+set @1day=dateadd(d,1,@1day);
+end;
+
+select * from calender;
+
