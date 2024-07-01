@@ -1,0 +1,19 @@
+ ---1.Select all departments in all locations where the Total Salary of a Department is Greater than twice the Average Salary for
+ --the department.
+---And max basic for the department is at least thrice the Min basic for the department
+
+create table EMP1 (
+id int identity(1,1) not null,
+name varchar(50) not null,
+department varchar(50) not null,
+salary int not null);
+
+insert into EMP1 values ('abc','Business Development',30000),('def','Business Development',31000),('ghi','Business Development',33000),
+('jkl','HR',50000),('mno','HR',49000),('pqr','Developer',50000),('stu','Developer',63000);
+
+insert into EMP1 values ('pranav','Developer',200000);
+
+select department from (select department ,2*avg(salary) as AV,sum(salary) as Total,max(salary) as msal,3*min(salary) 
+as misal from EMP1  group by department) as Table12 
+where AV<Total and msal>=misal;
+
