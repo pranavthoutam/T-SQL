@@ -17,3 +17,54 @@ select department from (select department ,2*avg(salary) as AV,sum(salary) as To
 as misal from EMP1  group by department) as Table12 
 where AV<Total and msal>=misal;
 
+-- 2)As per the companies rule if an employee has put up service of 1 Year 3 Months and 15 days in office, Then She/he would be eligible for a Bonus.
+--	the Bonus would be Paid on the first of the Next month after which a person has attained eligibility. Find out the eligibility date for all the employees. 
+--	And also find out the age of the Employee On the date of Payment of the First bonus. Display the Age in Years, Months, and Days.
+--	Also Display the weekday Name, week of the year, Day of the year and week of the month of the date on which the person has attained the eligibility
+
+CREATE TABLE Employees (
+    Emp_ID INT PRIMARY KEY,
+    Emp_Name VARCHAR(100),
+    DOB DATE,
+    DateOfJoining DATE
+);
+
+INSERT INTO Employees (Emp_ID, Emp_Name, DOB, DateOfJoining) VALUES
+(1, 'John', '1985-05-15', '2020-01-10'),
+(2, 'Jane', '1990-07-20', '2019-11-25'),
+(3, 'Sam', '1982-03-30', '2021-03-15');
+
+WITH EligibilityCTE AS (
+    SELECT
+        Emp_ID,
+        Emp_Name,
+        DOB,
+        DateOfJoining,
+        DATEADD(DAY, 15, DATEADD(MONTH, 3, DATEADD(YEAR, 1, DateOfJoining))) AS Eligibility_Date,
+        DATEADD(DAY, 1, EOMONTH(DATEADD(DAY, 15, DATEADD(MONTH, 3, DATEADD(YEAR, 1, DateOfJoining))))) AS Payment_Date
+    FROM Employees
+)
+SELECT
+    Emp_ID,
+    Emp_Name,
+    DateOfJoining,
+    DOB,
+    Eligibility_Date,
+    Payment_Date,
+    CONCAT(
+        DATEDIFF(YEAR, DOB, Payment_Date) - 
+            CASE 
+                WHEN MONTH(DOB) > MONTH(Payment_Date) OR
+                     (MONTH(DOB) = MONTH(Payment_Date) AND DAY(DOB) > DAY(Payment_Date))
+                THEN 1 
+                ELSE 0 
+            END, ' Years ',
+        (DATEDIFF(MONTH, DOB, Payment_Date) % 12), ' Months ',
+        DATEDIFF(DAY, DATEADD(MONTH, DATEDIFF(MONTH, DOB, Payment_Date), DOB), Payment_Date), ' Days'
+    ) AS Age_On_Payment_Date,
+    DATENAME(WEEKDAY, Eligibility_Date) AS Weekday_Name,
+    DATEPART(WEEK, Eligibility_Date) AS Week_Of_Year,
+    DATEPART(DAYOFYEAR, Eligibility_Date) AS Day_Of_Year,
+    DATEPART(WEEK, Eligibility_Date) - DATEPART(WEEK, DATEADD(MONTH, DATEDIFF(MONTH, 0, Eligibility_Date), 0)) + 1 AS Week_Of_Month
+FROM EligibilityCTE;
+
