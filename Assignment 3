@@ -128,16 +128,7 @@ FROM EligibleEmployees
 ORDER BY Emp_Name;
 --5)Write a query to list out all the employees where any of the words (Excluding Initials) in the Name starts and ends with
 --the samecharacter. (Assume there are not more than 5 words in any name 
-SELECT *
-FROM Employee_5
-WHERE EXISTS (
-    SELECT 1
-    FROM (
-        SELECT value AS Name
-        FROM STRING_SPLIT(Emp_Name, ' ')
-    ) AS Names
-    WHERE LEN(Names.Name) > 1 AND LEFT(Names.Name, 1) = RIGHT(Names.Name, 1)
-);
+
 SELECT *
 FROM Employee
 WHERE EXISTS (
