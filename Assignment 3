@@ -126,6 +126,56 @@ SELECT
     Service_Years_Left
 FROM EligibleEmployees
 ORDER BY Emp_Name;
+
+--4.write a query to Get Max, Min and Average age of employees, service of employees by service Type ,
+--Service Status for each Centre(display in years and Months)
+WITH EmployeeDetails AS (
+    SELECT
+        Center_ID,
+        ServiceType,
+        ServiceStatus,
+        Emp_ID,
+        Emp_Name,
+        DATEDIFF(YEAR, DOB, GETDATE()) AS AgeYears,
+        DATEDIFF(MONTH, DOB, GETDATE()) % 12 AS AgeMonths,
+        DATEDIFF(YEAR, DateOfJoining, GETDATE()) AS ServiceYears,
+        DATEDIFF(MONTH, DateOfJoining, GETDATE()) % 12 AS ServiceMonths
+    FROM Employees
+),
+AgeServiceSummary AS (
+    SELECT
+        Center_ID,
+        ServiceType,
+        ServiceStatus,
+        MAX(DATEDIFF(MONTH, DOB, GETDATE())) AS MaxAgeInMonths,
+        MIN(DATEDIFF(MONTH, DOB, GETDATE())) AS MinAgeInMonths,
+        AVG(DATEDIFF(MONTH, DOB, GETDATE())) AS AvgAgeInMonths,
+        MAX(DATEDIFF(MONTH, DateOfJoining, GETDATE())) AS MaxServiceInMonths,
+        MIN(DATEDIFF(MONTH, DateOfJoining, GETDATE())) AS MinServiceInMonths,
+        AVG(DATEDIFF(MONTH, DateOfJoining, GETDATE())) AS AvgServiceInMonths
+    FROM EmployeeDetails
+    GROUP BY Center_ID, ServiceType, ServiceStatus
+)
+SELECT
+    c.Center_Name,
+    a.ServiceType,
+    a.ServiceStatus,
+    a.MaxAgeInMonths / 12 AS MaxAgeYears,
+    a.MaxAgeInMonths % 12 AS MaxAgeMonths,
+    a.MinAgeInMonths / 12 AS MinAgeYears,
+    a.MinAgeInMonths % 12 AS MinAgeMonths,
+    a.AvgAgeInMonths / 12 AS AvgAgeYears,
+    a.AvgAgeInMonths % 12 AS AvgAgeMonths,
+    a.MaxServiceInMonths / 12 AS MaxServiceYears,
+    a.MaxServiceInMonths % 12 AS MaxServiceMonths,
+    a.MinServiceInMonths / 12 AS MinServiceYears,
+    a.MinServiceInMonths % 12 AS MinServiceMonths,
+    a.AvgServiceInMonths / 12 AS AvgServiceYears,
+    a.AvgServiceInMonths % 12 AS AvgServiceMonths
+FROM
+    AgeServiceSummary a
+    JOIN Centers c ON a.Center_ID = c.Center_ID;
+
 --5)Write a query to list out all the employees where any of the words (Excluding Initials) in the Name starts and ends with
 --the samecharacter. (Assume there are not more than 5 words in any name 
 
