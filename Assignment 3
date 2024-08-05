@@ -22,18 +22,6 @@ where AV<Total and msal>=misal;
 --	And also find out the age of the Employee On the date of Payment of the First bonus. Display the Age in Years, Months, and Days.
 --	Also Display the weekday Name, week of the year, Day of the year and week of the month of the date on which the person has attained the eligibility
 
-CREATE TABLE Employees (
-    Emp_ID INT PRIMARY KEY,
-    Emp_Name VARCHAR(100),
-    DOB DATE,
-    DateOfJoining DATE
-);
-
-INSERT INTO Employees (Emp_ID, Emp_Name, DOB, DateOfJoining) VALUES
-(1, 'John', '1985-05-15', '2020-01-10'),
-(2, 'Jane', '1990-07-20', '2019-11-25'),
-(3, 'Sam', '1982-03-30', '2021-03-15');
-
 WITH EligibilityCTE AS (
     SELECT
         Emp_ID,
@@ -68,3 +56,95 @@ SELECT
     DATEPART(WEEK, Eligibility_Date) - DATEPART(WEEK, DATEADD(MONTH, DATEDIFF(MONTH, 0, Eligibility_Date), 0)) + 1 AS Week_Of_Month
 FROM EligibilityCTE;
 
+--3)Company Has decided to Pay a bonus to all its employees. The criteria is as follows
+--1. Service Type 1. Employee Type 1. Minimum service is 10. Minimum service left should be 15 Years. Retirement age will be 60
+--Years
+--2. Service Type 1. Employee Type 2. Minimum service is 12. Minimum service left should be 14 Years . Retirement age will be 55
+--Years
+--3. Service Type 1. Employee Type 3. Minimum service is 12. Minimum service left should be 12 Years . Retirement age will be 55
+--Years
+--3. for Service Type 2,3,4 Minimum Service should Be 15 and Minimum service left should be 20 Years . Retirement age will be 65
+--Years
+--Write a query to find out the employees who are eligible for the bonus.
+WITH EmployeeDetails AS (
+    SELECT
+        Emp_ID,
+        Emp_Name,
+        DOB,
+        DateOfJoining,
+        Service_Type,
+        Employee_Type,
+        DATEDIFF(YEAR, DateOfJoining, GETDATE()) AS Service_Years,
+        CASE 
+            WHEN Employee_Type = 1 THEN 60 
+            WHEN Employee_Type IN (2, 3) THEN 55 
+            ELSE 65 
+        END AS Retirement_Age,
+        DATEDIFF(YEAR, DOB, GETDATE()) AS Current_Age
+    FROM Employees
+),
+EligibleEmployees AS (
+    SELECT
+        Emp_ID,
+        Emp_Name,
+        DateOfJoining,
+        DOB,
+        Service_Type,
+        Employee_Type,
+        Service_Years,
+        Retirement_Age,
+        Retirement_Age - DATEDIFF(YEAR, DOB, GETDATE()) AS Service_Years_Left
+    FROM EmployeeDetails
+    WHERE
+        (
+            Service_Type = 1 AND Employee_Type = 1 AND 
+            Service_Years >= 10 AND 
+            (Retirement_Age - DATEDIFF(YEAR, DOB, GETDATE())) >= 15
+        ) OR (
+            Service_Type = 1 AND Employee_Type = 2 AND 
+            Service_Years >= 12 AND 
+            (Retirement_Age - DATEDIFF(YEAR, DOB, GETDATE())) >= 14
+        ) OR (
+            Service_Type = 1 AND Employee_Type = 3 AND 
+            Service_Years >= 12 AND 
+            (Retirement_Age - DATEDIFF(YEAR, DOB, GETDATE())) >= 12
+        ) OR (
+            Service_Type IN (2, 3, 4) AND 
+            Service_Years >= 15 AND 
+            (Retirement_Age - DATEDIFF(YEAR, DOB, GETDATE())) >= 20
+        )
+)
+SELECT 
+    Emp_ID,
+    Emp_Name,
+    DateOfJoining,
+    DOB,
+    Service_Type,
+    Employee_Type,
+    Service_Years,
+    Retirement_Age,
+    Service_Years_Left
+FROM EligibleEmployees
+ORDER BY Emp_Name;
+--5)Write a query to list out all the employees where any of the words (Excluding Initials) in the Name starts and ends with
+--the samecharacter. (Assume there are not more than 5 words in any name 
+SELECT *
+FROM Employee_5
+WHERE EXISTS (
+    SELECT 1
+    FROM (
+        SELECT value AS Name
+        FROM STRING_SPLIT(Emp_Name, ' ')
+    ) AS Names
+    WHERE LEN(Names.Name) > 1 AND LEFT(Names.Name, 1) = RIGHT(Names.Name, 1)
+);
+SELECT *
+FROM Employee
+WHERE EXISTS (
+    SELECT 1
+    FROM (
+        SELECT value AS Name
+        FROM STRING_SPLIT(Emp_Name, ' ')
+    ) AS Names
+    WHERE LEN(Names.Name) > 1 AND LEFT(Names.Name, 1) = RIGHT(Names.Name, 1)
+);
